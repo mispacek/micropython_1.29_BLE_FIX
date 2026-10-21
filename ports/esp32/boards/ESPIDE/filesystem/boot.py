@@ -10,7 +10,7 @@ import time
 import utime
 from micropython import alloc_emergency_exception_buf
 
-# Buffer pro kriticke chyby programu
+# Emergency exception buffer for critical program errors
 alloc_emergency_exception_buf(128)
 
 def reset():
@@ -43,7 +43,7 @@ def printBar(num1,num2,col):
     print(" " * num2,end="") 
     print("]  ",end="")
 
-# Zobrazeni informaci o zarizeni v terminalu
+# Show device information in the terminal
 def info():
     gc.collect()    
     bar100 = 30
@@ -61,9 +61,9 @@ def info():
         col = 31
     
     b1 = T / bar100
-    print("Obsazena  RAM : ", end="")
+    print("RAM used: ", end="")
     printBar(int(A / b1), bar100 - int(A / b1),col)
-    print(terminal_color('{0:.1f}%'.format(P) + '   =   {0:.1f}kB z '.format(A / 1000) + '{0:.1f}kB'.format(T / 1000),col))
+    print(terminal_color('{0:.1f}%'.format(P) + '   =   {0:.1f}kB of '.format(A / 1000) + '{0:.1f}kB'.format(T / 1000),col))
 
     s = os.statvfs('//')
     flash100 = (s[0]*s[2])/1048576
@@ -78,39 +78,39 @@ def info():
         col = 31
     
     b1 = flash100 / bar100
-    print("Obsazena Flash: ", end="")
+    print("Flash used: ", end="")
     printBar(int((flash100-flash) / b1), bar100 - int((flash100-flash) / b1),col)
-    print(terminal_color('{0:.1f}%'.format(P) + '   =   {0:.3f}MB z '.format((flash100-flash)) + '{0:.3f}MB'.format(flash100),col)) 
+    print(terminal_color('{0:.1f}%'.format(P) + '   =   {0:.3f}MB of '.format((flash100-flash)) + '{0:.3f}MB'.format(flash100),col)) 
 
 
 _ERR_HINTS = {
-    'SyntaxError': 'Chyba syntaxe. (zavorky, dvojtecky ,uvozovky)',
-    'IndentationError': 'Spatne odsazeni (mezery/taby)',
-    'NameError': 'Pouzita nedefinovana promenna nebo funkce',
-    'TypeError': 'Spatny typ nebo pocet argumentu',
-    'ValueError': 'Spatny format nebo rozsah hodnoty',
-    'IndexError': 'Index je mimo seznam',
-    'KeyError': 'Klic ve slovniku neexistuje',
-    'AttributeError': 'Objekt nema vlastnost/metodu',
-    'ZeroDivisionError': 'Deleni nulou',
-    'ImportError': 'Chyba importu knihovny',
-    'OSError': 'Problem se souborem nebo zarizenim (I2C/SPI/FS)',
-    'MemoryError': 'Nedostatek RAM. Optimalizuj!',
+    'SyntaxError': 'Syntax error (brackets, colons or quotes)',
+    'IndentationError': 'Invalid indentation (spaces or tabs)',
+    'NameError': 'Undefined variable or function',
+    'TypeError': 'Invalid argument type or count',
+    'ValueError': 'Invalid value format or range',
+    'IndexError': 'Index out of range',
+    'KeyError': 'Dictionary key not found',
+    'AttributeError': 'Object has no such attribute or method',
+    'ZeroDivisionError': 'Division by zero',
+    'ImportError': 'Module import failed',
+    'OSError': 'File or device error (I2C/SPI/filesystem)',
+    'MemoryError': 'Out of RAM. Reduce memory usage.',
 }
 
 def _print_user_error(e):
     try:
         etype = e.__class__.__name__
     except Exception:
-        etype = 'Chyba'
+        etype = 'Error'
     try:
         msg = str(e)
     except Exception:
         msg = ''
     if msg:
-        head = 'CHYBA v programu (%s): %s' % (etype, msg)
+        head = 'Program error (%s): %s' % (etype, msg)
     else:
-        head = 'CHYBA v programu (%s)' % etype
+        head = 'Program error (%s)' % etype
     try:
         print(terminal_color(head, 31))
     except Exception:
@@ -124,7 +124,7 @@ def _print_user_error(e):
     if etype == 'OSError':
         try:
             if e.args and e.args[0] == 2:
-                msg2 = "Soubor nenalezen (zkontroluj 'idecode' a cesty)."
+                msg2 = "File not found (check 'idecode' and file paths)."
                 try:
                     print(terminal_color('Tip: ' + msg2, 33))
                 except Exception:
@@ -138,7 +138,7 @@ def _print_user_error(e):
 
 
 
-# Funkce ESP IDE pri zastaveni programu
+# ESP IDE program stop helper
 def stop_code():
     try:
         on_exit()
@@ -146,9 +146,9 @@ def stop_code():
         time.sleep_ms(0)
 
 
-# Funkce ESP IDE pro spusteni programu (paměťově úspornější)
+# ESP IDE program execution helper (reduced memory usage)
 def run_code():
-    G = globals()  # lokální reference = méně lookupů
+    G = globals()  # local reference reduces global lookups
     try:
         gc.collect()
         with open("idecode", "r") as f:
@@ -160,16 +160,16 @@ def run_code():
         del code
         gc.collect()
     except KeyboardInterrupt:
-        print('Zastaveni programu')
+        print('Program stopped')
         gc.collect()
         stop_code()
 
     except MemoryError:
         gc.collect()
         try:
-            print(terminal_color("CHYBA: Nedostatek RAM.", 31))
+            print(terminal_color("ERROR: Out of RAM.", 31))
         except Exception:
-            print("CHYBA: Nedostatek RAM.")
+            print("ERROR: Out of RAM.")
 
     except Exception as e:
         gc.collect()

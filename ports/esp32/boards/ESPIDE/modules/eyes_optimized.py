@@ -2,26 +2,26 @@
 # Copyright (c) 2019-2026 Milan Spacek
 # ESP IDE: https://espide.eu
 # Released under MIT for this fork by the copyright holder on 2026-10-21.
-# eyes_optimized.py — MicroPython RoboEyes (MONO_VLSB), rychla verze
+# eyes_optimized.py - MicroPython RoboEyes (MONO_VLSB), optimized version
 # - based on https://github.com/FluxGarage/RoboEyes
-# - pre-render & cache rounded-rect "oko" a blit pri kazdem frame
-# - zadne floaty, integer tweening, minimum Pythonu v horke smycce
+# - pre-render and cache rounded-rectangle eyes; blit each frame
+# - no floats, integer tweening, minimal Python work in the hot loop
 
 import utime as time
 import urandom as _urnd
 import framebuf
 
-# --- Barvy ---
+# --- Colors ---
 BGCOLOR = 0
 MAINCOLOR = 1
 
-# --- Moody ---
+# --- Moods ---
 DEFAULT = 0
 TIRED = 1
 ANGRY = 2
 HAPPY = 3
 
-# --- Konstanty poloh ---
+# --- Position constants ---
 N, NE, E, SE, S, SW, W, NW = 1,2,3,4,5,6,7,8
 
 # --- Utility ---
@@ -35,7 +35,7 @@ def _rand(n):
         return _urnd.getrandbits(16) % n
     return 0
 
-# --- Predpocty masek pro zaoblene rohy (pro generovani bitmapy oka) ---
+# --- Precomputed rounded-corner masks for eye bitmap generation ---
 _MAX_R = 16
 _MASKS = {0: []}
 def _precompute_round_masks():
@@ -44,7 +44,7 @@ def _precompute_round_masks():
         rr = r*r
         rows = []
         for dy in range(r):
-            # integer sqrt aproximace (male r -> linearni dolu)
+            # integer square-root approximation (small radii round down linearly)
             xi = r
             rem = rr - dy*dy
             while xi*xi > rem:
@@ -54,16 +54,16 @@ def _precompute_round_masks():
 _precompute_round_masks()
 
 def _fill_round_rect(fb, x, y, w, h, r, col):
-    # Trivialni pripady
+    # Trivial cases
     if w <= 0 or h <= 0:
         return
 
-    # Puvodni rychly „bez radiusu“
+    # Original fast path without rounded corners
     if r <= 0:
         fb.fill_rect(x, y, w, h, col)
         return
 
-    # Orez radiusu na rozumne meze
+    # Clamp the radius to valid bounds
     if r > _MAX_R:
         r = _MAX_R
     if r * 2 > w:
@@ -71,12 +71,12 @@ def _fill_round_rect(fb, x, y, w, h, r, col):
     if r * 2 > h:
         r = h // 2
 
-    # PO OREZU muze byt r == 0 → uz neni co zaoblovat
+    # After clamping, r may be zero: no corners remain to round
     if r <= 0:
         fb.fill_rect(x, y, w, h, col)
         return
 
-    # Stred a boky
+    # Center and sides
     fb.fill_rect(x + r, y, w - 2 * r, h, col)
     if h - 2 * r > 0:
         fb.fill_rect(x, y + r, r, h - 2 * r, col)
@@ -84,23 +84,23 @@ def _fill_round_rect(fb, x, y, w, h, r, col):
 
     rows = _MASKS[r]
 
-    # TOP: potrebujeme male dx nahore → pouzij obracene poradi
+    # TOP: use reversed order to get small dx at the top
     for dy in range(r):
         dx = rows[r - 1 - dy]
         if dx:
-            fb.hline(x + r - dx, y + dy, dx, col)       # levy horni
-            fb.hline(x + w - r,  y + dy, dx, col)       # pravy horni
+            fb.hline(x + r - dx, y + dy, dx, col)       # top left
+            fb.hline(x + w - r,  y + dy, dx, col)       # top right
 
-    # BOTTOM: klasicke poradi
+    # BOTTOM: use the normal order
     for dy in range(r):
         dx = rows[dy]
         if dx:
             yy = y + h - r + dy
-            fb.hline(x + r - dx, yy, dx, col)           # levy dolni
-            fb.hline(x + w - r,  yy, dx, col)           # pravy dolni
+            fb.hline(x + r - dx, yy, dx, col)           # bottom left
+            fb.hline(x + w - r,  yy, dx, col)           # bottom right
 
 def _fill_triangle(fb, x0, y0, x1, y1, x2, y2, col):
-    # serazeni podle y
+    # sort by y
     if y0 > y1: x0, x1, y0, y1 = x1, x0, y1, y0
     if y1 > y2: x1, x2, y1, y2 = x2, x1, y2, y1
     if y0 > y1: x0, x1, y0, y1 = x1, x0, y1, y0
@@ -115,14 +115,14 @@ def _fill_triangle(fb, x0, y0, x1, y1, x2, y2, col):
         num = (x1 - x0) * (y - y0)
         return x0 + (num // dy) if num >= 0 else x0 - ((-num) // dy)
 
-    # horni cast
+    # upper section
     y = y0
     while y <= y1:
         xa = edge_x(y, y0, x0, y2, x2)
         xb = edge_x(y, y0, x0, y1, x1)
         draw_scanline(y, xa, xb)
         y += 1
-    # dolni cast
+    # lower section
     y = y1 + 1
     while y <= y2:
         xa = edge_x(y, y0, x0, y2, x2)
@@ -130,7 +130,7 @@ def _fill_triangle(fb, x0, y0, x1, y1, x2, y2, col):
         draw_scanline(y, xa, xb)
         y += 1
 
-# ----------------- Oko bitmap cache (LRU) -----------------
+# ----------------- Eye bitmap cache (LRU) -----------------
 class _EyeCache:
     def __init__(self, max_items=24):
         self.max = max_items
@@ -147,7 +147,7 @@ class _EyeCache:
             except ValueError:
                 pass
             self._order.append(k)
-            return ent[1]  # vraci FrameBuffer
+            return ent[1]  # return the FrameBuffer
         # create
         pages = (h + 7) >> 3
         buf = bytearray(w * pages)
@@ -163,19 +163,19 @@ class _EyeCache:
         return fb
 
 # =========================================================
-#                     TRIDA ROBOEYES
+#                     ROBOEYES CLASS
 # =========================================================
 class RoboEyes:
     def __init__(self, fbuf, display):
         self.fbuf = fbuf
         
-        # detekce signatury blit() na teto platforme (3-arg vs 4-arg)
+        # detect the platform blit() signature (3 or 4 arguments)
         try:
-            # pokus s 4 parametry (key=-1 = bez transparentni barvy)
+            # try 4 arguments (key=-1 means no transparent color)
             self.fbuf.blit(self.fbuf, 0, 0, -1)
             self._blit = lambda src, x, y: self.fbuf.blit(src, x, y, -1)
         except TypeError:
-            # starsi/usporne porty: jen 3 parametry
+            # older or smaller ports: only 3 arguments
             self._blit = lambda src, x, y: self.fbuf.blit(src, x, y)
         
         
@@ -185,12 +185,12 @@ class RoboEyes:
         self.frameInterval = 20
         self._fpsTimer = time.ticks_ms()
 
-        # Stavy / prepinace
+        # State and switches
         self.tired = self.angry = self.happy = 0
         self.curious = self.cyclops = 0
         self.eyeL_open = self.eyeR_open = 0
 
-        # Rozmery
+        # Dimensions
         self.eyeLwidthDefault = 36
         self.eyeLheightDefault = 36
         self.eyeLwidthCurrent = self.eyeLwidthDefault
@@ -213,7 +213,7 @@ class RoboEyes:
         self.eyeRborderRadiusCurrent = 8
         self.eyeRborderRadiusNext = 8
 
-        # Roztec a pozice
+        # Spacing and position
         self.spaceBetweenDefault = 10
         self.spaceBetweenCurrent = 10
         self.spaceBetweenNext = 10
@@ -233,7 +233,7 @@ class RoboEyes:
         self.eyeRxNext = self.eyeRx
         self.eyeRyNext = self.eyeRy
 
-        # Vicka
+        # Eyelids
         self.eyelidsHeightMax = self.eyeLheightDefault >> 1
         self.eyelidsTiredHeight = 0
         self.eyelidsTiredHeightNext = 0
@@ -243,7 +243,7 @@ class RoboEyes:
         self.eyelidsHappyBottomOffset = 0
         self.eyelidsHappyBottomOffsetNext = 0
 
-        # Makro animace
+        # Macro animations
         self.hFlicker = self.hFlickerAlternate = 0
         self.hFlickerAmplitude = 2
         self.vFlicker = self.vFlickerAlternate = 0
@@ -278,7 +278,7 @@ class RoboEyes:
         self.sweat1Height = self.sweat2Height = self.sweat3Height = 2
         self.sweat1Width  = self.sweat2Width  = self.sweat3Width  = 1
 
-        # Cache pro oci (pre-render)
+        # Eye cache (pre-rendered)
         self._eye_cache = _EyeCache(max_items=24)
 
     # --------- API ----------
@@ -306,20 +306,20 @@ class RoboEyes:
         BGCOLOR = background; MAINCOLOR = main
 
     def _keep_center_x(self, total_w_next: int):
-        # soucasny (animovany) celkovy rozmer paru
+        # current animated width of the eye pair
         total_w_cur = self.eyeLwidthCurrent + self.spaceBetweenCurrent + self.eyeRwidthCurrent
-        # aktualni geometricky stred paru (vuci obrazovce)
+        # current geometric center of the pair on the screen
         cx = self.eyeLx + (total_w_cur >> 1)
 
-        # kam musi prijit leve oko, aby stred zustal stejny po zmene sirek/mezery
+        # left-eye position that preserves the center after width or spacing changes
         newLx = (self.screenWidth >> 1) - (total_w_next >> 1)
 
-        # omez na obrazovku
+        # clamp to the screen
         max_lx = self.screenWidth - total_w_next
         if newLx < 0: newLx = 0
         elif newLx > max_lx: newLx = max_lx
 
-        # nastav jak cilovou, tak „okamzitou“ polohu X – Y se NEMENI
+        # set both target and current X positions; keep Y unchanged
         self.eyeLx = int(newLx)
         self.eyeLxNext = int(newLx)
 
@@ -347,7 +347,7 @@ class RoboEyes:
         else: self.tired = self.angry = self.happy = 0
 
     def setPosition(self, position):
-        # vyuziva constrainty pro leve oko, prave se odvodi
+        # apply left-eye constraints and derive the right-eye position
         gx = self._getScreenConstraint_X()
         gy = self._getScreenConstraint_Y()
         if   position == N:  self.eyeLxNext, self.eyeLyNext = gx>>1, 0
@@ -361,20 +361,20 @@ class RoboEyes:
         else:                self.eyeLxNext, self.eyeLyNext = gx>>1, gy>>1
 
     def look_joystick(self, X, Y):
-        # 1) clamp vstupu
+        # 1) clamp the input
         if X < -100: X = -100
         if X >  100: X =  100
         if Y < -100: Y = -100
         if Y >  100: Y =  100
 
-        # 2) stejne mantinely jako setPosition()
+        # 2) use the same bounds as setPosition()
         max_x = self._getScreenConstraint_X()
         max_y = self._getScreenConstraint_Y()
 
-        # 3) linearni mapovani do rozsahu 0..max
-        #    X: (-100..100) → (0..max_x)
+        # 3) map linearly to the range 0..max
+        #    X: (-100..100) -> (0..max_x)
         self.eyeLxNext = int(((X + 100) * max_x) // 200)
-        #    Y: (+100..-100) → (0..max_y)  (kladne Y = nahoru → mensi obrazove Y)
+        #    Y: (+100..-100) -> (0..max_y)  (positive Y points up, giving smaller screen Y)
         self.eyeLyNext = int(((-Y + 100) * max_y) // 200)
 
     def setAutoblinker(self, active, interval=None, variation=None):
@@ -421,19 +421,19 @@ class RoboEyes:
     def anim_confused(self): self.confused = 1
     def anim_laugh(self):    self.laugh = 1
 
-    # --------- interni pomocnici ----------
+    # --------- internal helpers ----------
     def _getScreenConstraint_X(self):
         return self.screenWidth - self.eyeLwidthCurrent - self.spaceBetweenCurrent - self.eyeRwidthCurrent
     def _getScreenConstraint_Y(self):
         return self.screenHeight - self.eyeLheightDefault
 
     def _drawEyes(self):
-        # Lokalni aliasy (mene attribute lookups)
+        # Local aliases (fewer attribute lookups)
         fb = self.fbuf
         MA = MAINCOLOR
         BG = BGCOLOR
 
-        # -------- tweening + logika --------
+        # -------- tweening and logic --------
         if self.curious:
             self.eyeLheightOffset = 8 if (self.eyeLxNext <= 10 or (self.eyeLxNext >= (self._getScreenConstraint_X() - 10) and self.cyclops)) else 0
             self.eyeRheightOffset = 8 if (self.eyeRxNext >= self.screenWidth - self.eyeRwidthCurrent - 10) else 0
@@ -508,24 +508,24 @@ class RoboEyes:
         self.eyeRx = _clamp(self.eyeRx, 0, self.screenWidth - 1)
         self.eyeRy = _clamp(self.eyeRy, 0, self.screenHeight - 1)
 
-        # -------- kresleni --------
+        # -------- drawing --------
         fb.fill(BG)
 
-        # PRE-RENDER oci -> blit
+        # PRE-RENDER eyes, then blit
         Lw, Lh, Lr = self.eyeLwidthCurrent, self.eyeLheightCurrent, self.eyeLborderRadiusCurrent
         Rw, Rh, Rr = self.eyeRwidthCurrent, self.eyeRheightCurrent, self.eyeRborderRadiusCurrent
 
-        # leve oko
+        # left eye
         if Lw > 0 and Lh > 0:
             lfb = self._eye_cache.get(Lw, Lh, Lr)
             self._blit(lfb, self.eyeLx, self.eyeLy)
 
-        # prave oko
+        # right eye
         if not self.cyclops and Rw > 0 and Rh > 0:
             rfb = self._eye_cache.get(Rw, Rh, Rr)
             self._blit(rfb, self.eyeRx, self.eyeRy)
 
-        # mood vicka (stejna logika, ale area je uz mala)
+        # mood eyelids (same logic over a smaller area)
         self.eyelidsTiredHeightNext = (self.eyeLheightCurrent >> 1) if self.tired else 0
         self.eyelidsAngryHeightNext = (self.eyeLheightCurrent >> 1) if self.angry else 0
         self.eyelidsHappyBottomOffsetNext = (self.eyeLheightCurrent >> 1) if self.happy else 0
@@ -568,14 +568,14 @@ class RoboEyes:
 
         off = self.eyelidsHappyBottomOffset
         if off > 0:
-            # leve – rezeme jen spodni pas vysky 'off'
+            # left: crop only the bottom strip of height 'off'
             h_cut = off
             y_cut = self.eyeLy + Lh - off
             r_cut = self.eyeLborderRadiusCurrent
-            if r_cut > off: r_cut = off  # radius nesmi byt vetsi nez vyska pasu
+            if r_cut > off: r_cut = off  # the radius must not exceed the strip height
             _fill_round_rect(fb, self.eyeLx, y_cut, Lw, h_cut, r_cut, BG)
 
-            # prave
+            # right
             if not self.cyclops:
                 h_cut = off
                 y_cut = self.eyeRy + Rh - off
@@ -584,7 +584,7 @@ class RoboEyes:
                 _fill_round_rect(fb, self.eyeRx, y_cut, Rw, h_cut, r_cut, BG)
 
 
-        # pot
+        # sweat
         if self.sweat:
             # 1
             if self.sweat1YPos <= self.sweat1YPosMax: self.sweat1YPos += 1

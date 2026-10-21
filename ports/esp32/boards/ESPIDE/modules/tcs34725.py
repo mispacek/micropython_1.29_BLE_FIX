@@ -237,7 +237,7 @@ class TCS34725:
         V = Cmax
         # print output. H in degrees. S and V in percentage. 
         # these values may also be represented from 0 to 255.
-        #print("H = {:.1f}°".format(H))
+        #print("H = {:.1f} deg".format(H))
         #print("S = {:.1f}%".format(S * 100))
         #print("V = {:.1f}%".format(V * 100))
         

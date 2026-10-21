@@ -34,8 +34,10 @@ module use native interruption. The legacy `fm_rpc.py` treats its `ble_flag`
 import as optional. No other peripheral library versions are silently updated.
 
 The copyright holder authorized MIT licensing of the imported ESP IDE code
-for this fork on 2026-10-21. Only license comments were changed; the Python
-AST of every imported file is unchanged. The existing MIT BLE driver and
+for this fork on 2026-10-21. Comments, diagnostics and error hints are in
+English for the global firmware distribution. Translation changes only
+comments and human-readable strings; APIs and protocol tokens are preserved.
+The existing MIT BLE driver and
 time proxy remain byte-for-byte copies. The Moonbench attribution and MIT
 notice for `oled_charts.py` are retained in `ports/esp32/boards/ESPIDE/LICENSE`.
 `SOURCES.json` records origins, original source hashes and current fork hashes;
@@ -49,8 +51,8 @@ The new manifest, startup file, verifier and host tests remain checked.
 does not install them into the device filesystem automatically.
 
 Upload `boot.py` as `/boot.py` and `main.py` as `/main.py`. The supplied `boot.py`
-is the ESP IDE source from the same S3 installation with its MIT license header;
-its runtime code is unchanged. It provides
+is the ESP IDE source from the same S3 installation with its MIT license header
+and English diagnostics and comments. Its control flow is unchanged. It provides
 `run_code()` and the usual ESP IDE REPL helpers. The adapted `main.py` imports
 its dependencies explicitly and uses a C3/C6 banner.
 
@@ -95,7 +97,13 @@ Host startup checks can also run without ESP-IDF:
 
 ```sh
 python -m unittest discover -s tools/tests -p test_espide_startup.py -v
+python tools/verify_espide_english.py
 ```
+
+Before adding a frozen library, review all comments, docstrings and diagnostics
+for English text. The source guard checks every Python file in the shared
+modules and filesystem directories, including newly added files. It rejects
+non-ASCII source and known Czech phrases, but does not replace language review.
 
 Host tests and successful firmware builds do not prove BLE file transfer,
 Ctrl+C, print-flood recovery, or simultaneous Wi-Fi/BLE operation on hardware.

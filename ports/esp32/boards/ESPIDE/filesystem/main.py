@@ -20,15 +20,15 @@ def start_BLE():
             raw = f.read(32)
     except OSError as e:
         if e.args and e.args[0] == 2:
-            print("Bluetooth nebyl povolen")
+            print("Bluetooth is disabled")
         else:
-            print("Chyba pri cteni Bluetooth konfigurace:", e)
+            print("Failed to read Bluetooth configuration:", e)
         return
 
     # Match the ESP IDE name limit without silently changing an invalid name.
     name_b = raw.strip()
     if not 3 <= len(name_b) <= 8 or any(c < 32 or c > 126 for c in name_b):
-        print("Bluetooth nazev neni platny (3-8 ASCII znaku)")
+        print("Invalid Bluetooth name (use 3-8 printable ASCII characters)")
         return
 
     try:
@@ -37,9 +37,9 @@ def start_BLE():
         start_ble_repl(name=name_b, slot=0)
         _ble_name = name_b.decode("ascii")
         _ble_started = True
-        print("Bluetooth nazev:", _ble_name)
+        print("Bluetooth name:", _ble_name)
     except Exception as e:
-        print("Chyba pri startu Bluetooth:", e)
+        print("Failed to start Bluetooth:", e)
 
 
 def autostart():
@@ -48,18 +48,18 @@ def autostart():
             start_data = f.read(16)
     except OSError as e:
         if not e.args or e.args[0] != 2:
-            print("Chyba pri cteni souboru idecode:", e)
+            print("Failed to read idecode:", e)
         return
 
     if "#autostart*" in start_data:
-        print("Autostart programu za 2s")
+        print("Starting the program in 2 seconds")
         time.sleep(2)
-        print("Startuji...")
+        print("Starting...")
         try:
             # run_code is provided by the accompanying filesystem boot.py.
             run_code()  # noqa: F821
         except Exception as e:
-            print("Chyba pri behu programu:")
+            print("Program execution failed:")
             sys.print_exception(e)
 
 

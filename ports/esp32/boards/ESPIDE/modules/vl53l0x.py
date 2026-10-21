@@ -47,15 +47,15 @@ class VL53L0X():
         self.last_read_value = self.read()
         self.val_array = [self.last_read_value,self.last_read_value,self.last_read_value, self.last_read_value, self.last_read_value, self.last_read_value, self.last_read_value, self.last_read_value]
         
-        # nepouziva se
+        # unused compatibility setting
         self.vcsel_period_type = ["VcselPeriodPreRange", "VcselPeriodFinalRange"]
     
     
     def filtruj_prumer(self, hodnoty):
         if len(hodnoty) < 4:
-            return "Pole musí obsahovat alespoň 4 hodnoty."
+            return "The list must contain at least 4 values."
         
-        kopie_hodnot = hodnoty[:]  # Vytvoření kopie původního pole
+        kopie_hodnot = hodnoty[:]  # Copy the original list
         nejmensi = min(kopie_hodnot)
         nejvetsi = max(kopie_hodnot)
         kopie_hodnot.remove(nejmensi)
@@ -69,11 +69,11 @@ class VL53L0X():
         
         return konecny_prumer
     
-    # nepouziva se
+    # unused compatibility setting
     def set_Vcsel_pulse_period(self, type, period_pclks):
         return True
     
-    # nepouziva se
+    # unused compatibility setting
     def set_measurement_timing_budget(self, budget_us):
         return True
 
@@ -401,34 +401,34 @@ class VL53L0X():
                     break
                 utime.sleep_ms(1)
             else:
-                print("Chyba komunikace s dalkomerem")
+                print("Distance sensor communication error")
                 return self.last_read_value
                 #raise TimeoutError()
         if self.last_read_value == 0 or (self.last_read_timestamp + 100) < utime.ticks_ms():
-            #print("blokuju")
+            #print("waiting for a measurement")
             for timeout in range(_IO_TIMEOUT):
                 if self._register(_RESULT_INTERRUPT_STATUS) & 0x07:
                     break
                 utime.sleep_ms(1)
             else:
-                print("Chyba komunikace s dalkomerem")
+                print("Distance sensor communication error")
                 return self.last_read_value
                 #raise TimeoutError()
                 
         if self._register(_RESULT_INTERRUPT_STATUS) & 0x07:
-            #print("existuje hodnota")
+            #print("measurement available")
             value = self._register(_RESULT_RANGE_STATUS + 10, struct='>H')
             self._register(_INTERRUPT_CLEAR, 0x01)
 
-            self.val_array.pop()  # Odebrání posledního prvku z pole
-            self.val_array.insert(0, value)  # Přidání nové hodnoty na začátek pole
+            self.val_array.pop()  # Remove the last list item
+            self.val_array.insert(0, value)  # Insert the new value at the start of the list
             
             self.last_read_value = self.filtruj_prumer(self.val_array) 
             self.last_read_timestamp = utime.ticks_ms()
             
             return self.last_read_value
         else:
-            #print("vracim hodnotu z pameti")
+            #print("returning the cached value")
             return self.last_read_value
         
         

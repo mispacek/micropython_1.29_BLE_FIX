@@ -7,6 +7,7 @@ on:
       - '.github/actions/setup_esp32/**'
       - 'ports/esp32/**'
       - 'tools/verify_esp32_ble_wifi.py'
+      - 'tools/verify_espide_english.py'
       - 'tools/tests/test_espide_startup.py'
   pull_request:
     paths:
@@ -14,6 +15,7 @@ on:
       - '.github/actions/setup_esp32/**'
       - 'ports/esp32/**'
       - 'tools/verify_esp32_ble_wifi.py'
+      - 'tools/verify_espide_english.py'
       - 'tools/tests/test_espide_startup.py'
   workflow_dispatch:
 
@@ -36,6 +38,9 @@ jobs:
       BOARD: ${{ matrix.board }}
     steps:
       - uses: actions/checkout@v7
+
+      - name: Check English firmware sources
+        run: python tools/verify_espide_english.py
 
       - name: Check filesystem startup
         run: python -m unittest discover -s tools/tests -p test_espide_startup.py -v

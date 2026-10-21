@@ -2,7 +2,7 @@
 # Copyright (c) 2019-2026 Milan Spacek
 # ESP IDE: https://espide.eu
 # Released under MIT for this fork by the copyright holder on 2026-10-21.
-# fm_rpc.py — MicroPython helpers for REPL-based file management
+# fm_rpc.py - MicroPython helpers for REPL-based file management
 # Place to /lib/fm_rpc.py (or anywhere on sys.path)
 
 import os, sys
@@ -124,7 +124,7 @@ def _exists(p):
     except Exception:
         return False
 
-# Prijima bitove "mode" *nebo* cestu; vraci True pokud je to adresar.
+# Accept mode bits or a path; return True for a directory.
 def _isdir(x):
     try:
         if isinstance(x, int):
@@ -199,13 +199,13 @@ def _copy_file(src, dst):
             fdst.write(b)
 
 def _copy_tree(src, dst):
-    # vytvor cilovou slozku, pokud neexistuje
+    # create the destination directory if it does not exist
     try:
         os.mkdir(dst)
     except Exception:
         pass
 
-    # ilistdir muze vracet ruzne tupliky dle portu
+    # ilistdir tuple shapes can vary between ports
     try:
         it = os.ilistdir(src)
     except Exception:
@@ -231,7 +231,7 @@ def _copy_tree(src, dst):
             else:
                 _copy_file(s, d)
         except Exception:
-            # pokracuj dal, at jedna chyba nezastavi strom
+            # continue so one failure does not stop the entire tree
             continue
 
 def _is_subpath(parent, child):
@@ -257,7 +257,7 @@ def copy(src_list, dest_dir):
         base = s.rsplit("/", 1)[-1]
         d = _join(dest, base)
 
-        # ochrana: nezkopirovat adresar do sebe/pod sebe
+        # guard against copying a directory into itself or a descendant
         if _isdir(s) and _is_subpath(s, d):
             return {"ok": False, "error": "cannot copy dir into itself"}
 
@@ -289,7 +289,7 @@ def move(src_list, dest_dir):
         base = s.rsplit("/", 1)[-1]
         d = _join(dest, base)
 
-        # ochrana: nepresouvat adresar do vlastniho podstromu
+        # guard against moving a directory into its own subtree
         if _isdir(s) and _is_subpath(s, d):
             return {"ok": False, "error": "cannot move dir into itself"}
 
@@ -383,7 +383,7 @@ def delete_path(path):
                 name = e[0] if isinstance(e, tuple) else e
                 stack.append(bp + name)
 
-# ---------- STREAMED DOWNLOAD + LIST (textove protokoly pro frontend) ----------
+# ---------- STREAMED DOWNLOAD + LIST (text protocols for the frontend) ----------
 
 def fm_down(path, chunk_bytes, pause_ms):
     try:

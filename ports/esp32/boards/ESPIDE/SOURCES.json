@@ -2,23 +2,23 @@
   {
     "file": "AccelStepper.py",
     "source": "mispacek/micropython_BLE_FIX@403ac1335:ports/esp32/boards/ESP32_GENERIC_C3/modules/AccelStepper.py",
-    "sha256": "39cf9edaf9e19232bc457517498e1b6464c98041710ea78041d049fd62e3a5c9",
+    "sha256": "e57e4fa8e108e451c47331fe744759c7f3ff3e39fd347ea7e32ab0558971ad12",
     "source_sha256": "de8c1fd04a50cb7ec71b7aa4f872d9533bf7be061be203b4d724cc7b02a05355",
-    "changes": "MIT license header only; Python AST unchanged"
+    "changes": "MIT license header and English comments/messages; non-string AST unchanged"
   },
   {
     "file": "eyes_optimized.py",
     "source": "mispacek/micropython_BLE_FIX@403ac1335:ports/esp32/boards/ESP32_GENERIC_C3/modules/eyes_optimized.py",
-    "sha256": "d4f6dcf09fad53109582ebcfbfca97d02931792bba67d72e7f01fe46124b62c3",
+    "sha256": "c4c065ad2236640038f32d7f7619412922a7d39d2651cc41b293d45956728d74",
     "source_sha256": "1743f69ab83538e6d5c2eb488793d1287967ce6d2997c5a0d18088eeeb97ddbd",
-    "changes": "MIT license header only; Python AST unchanged"
+    "changes": "MIT license header and English comments/messages; non-string AST unchanged"
   },
   {
     "file": "fm_rpc.py",
     "source": "mispacek/micropython_BLE_FIX@403ac1335:ports/esp32/boards/ESP32_GENERIC_C3/modules/fm_rpc.py",
-    "sha256": "603d1ac1c9fc34c28897c4a1c05f16248a1192610f21438babbfa9026e06f85f",
+    "sha256": "fbca5cfd6171a8ecdee7a254f8f5f528cb6fde649d86086bb5b9ec065342f089",
     "source_sha256": "e139129500effcd6ff6f7ba2c906d3d37942258d3d2064846f42831f8893d738",
-    "changes": "MIT license header only; Python AST unchanged"
+    "changes": "MIT license header and English comments/messages; non-string AST unchanged"
   },
   {
     "file": "oled_charts.py",
@@ -30,16 +30,16 @@
   {
     "file": "tcs34725.py",
     "source": "mispacek/micropython_BLE_FIX@403ac1335:ports/esp32/boards/ESP32_GENERIC_C3/modules/tcs34725.py",
-    "sha256": "deedd281503a094aefc5285204efcd0b7d555e500e961ccabc9d101220b62784",
+    "sha256": "dd7eb2c74c31238dae0cf05004725da2c46e69ebb7a1465fd12a8576ecf02ecc",
     "source_sha256": "75e2dd030244a007854efb8292ec53dc340312a857acfb3905e23c4bd5814238",
-    "changes": "MIT license header only; Python AST unchanged"
+    "changes": "MIT license header and English comments/messages; non-string AST unchanged"
   },
   {
     "file": "vl53l0x.py",
     "source": "mispacek/micropython_BLE_FIX@403ac1335:ports/esp32/boards/ESP32_GENERIC_C3/modules/vl53l0x.py",
-    "sha256": "724d8b3dc895bc7a8a0a022bbe3ca30f21521b21e24c6da4381fff00649e897a",
+    "sha256": "684a8ba7f2910b5f2f22b3f185527d76ac9992e672fdd8ddce3801677cf242a7",
     "source_sha256": "33bffde48435b74ec8f32301c20942d797edc9ae5d7a156585652a1791485cf8",
-    "changes": "MIT license header only; Python AST unchanged"
+    "changes": "MIT license header and English comments/messages; non-string AST unchanged"
   },
   {
     "file": "ble_repl_bletime.py",
@@ -58,8 +58,8 @@
   {
     "file": "filesystem/boot.py",
     "source": "instalace_new/esp32_s3_1_29_BLE/boot.py",
-    "sha256": "3a5d720ec18912b40af6a08d8848af62169c0058a1ddb84c100ef0380b41b918",
+    "sha256": "05075c181b7a7bcbb5e4c456128273ffdb7a4c0cfaf76272b08f87306c6f469b",
     "source_sha256": "d9d0beb0d2232eb6b428db7e749c27d525f8fbfb35b2d7369dcacc26bc404965",
-    "changes": "MIT license header only; Python AST unchanged"
+    "changes": "MIT license header and English comments/messages; non-string AST unchanged"
   }
 ]
