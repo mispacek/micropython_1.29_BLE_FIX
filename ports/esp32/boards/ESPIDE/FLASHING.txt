@@ -1,0 +1,15 @@
+ESP32-C3 / ESP32-C6 MicroPython v1.29.0 BLE + Wi-Fi
+
+Use the artifact for your chip. For a normal installation, select firmware.bin
+and flash it at address 0x0, then reset the board. It includes the bootloader,
+partition table and MicroPython application.
+
+micropython.bin is the application ONLY. Its offset is 0x10000. It requires
+the matching bootloader at 0x0 and partition table at 0x8000. Do not flash
+micropython.bin at 0x0.
+
+boot.py and main.py are separate filesystem files, not part of firmware.bin.
+Reset the board to discard any temporary diagnostic monkey patches before
+testing the new firmware. A complete flash erase is not required for this fix.
+
+The ELF file is supplied for crash diagnosis and is not a flash image.

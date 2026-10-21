@@ -84,6 +84,18 @@ Keep the other, non-frozen ESP IDE libraries installed.
 
 ## Build and artifacts
 
+For installation, flash the combined **`firmware.bin` at `0x0`**, then reset.
+`micropython.bin` is only the application at `0x10000`; it requires the matching
+bootloader and partition table. Each firmware artifact includes `FLASHING.txt`.
+
+The frozen-code generator pads RISC-V native arrays to an even storage size.
+Without this padding, odd-length arrays can leave later functions at odd
+addresses despite their alignment attributes. The C3 crash was reproduced by
+calling the frozen BLE stream's `write(b"")` before a connection, with its
+entry point at `0x420557e3`. The workflow now checks every frozen native code
+symbol's address and size in the final ELF and retains that ELF for diagnosis.
+BLE protocol and driver sources are unchanged by this build fix.
+
 Use the MicroPython ESP32 build instructions with ESP-IDF v5.5.2 and the pinned
 submodules from this checkout. After sourcing the IDF environment:
 

@@ -1294,9 +1294,16 @@ class RawCodeNative(RawCode):
             "// frozen native code for file %s, scope %s"
             % (self.qstr_table[0].str, self.escaped_name)
         )
+        # RISC-V text alignment assumes that preceding data ends on an instruction
+        # boundary. An odd-length prelude can defeat the next array's aligned(2)
+        # attribute, leaving executable code at an odd address. Pad the storage,
+        # while keeping the original code and prelude offsets unchanged.
+        storage_len = len(self.fun_data)
+        if config.native_arch in (MP_NATIVE_ARCH_RV32IMC, MP_NATIVE_ARCH_RV64IMC):
+            storage_len = (storage_len + 1) & ~1
         print(
             "static const byte fun_data_%s[%u] %s = {"
-            % (self.escaped_name, len(self.fun_data), self.fun_data_attributes)
+            % (self.escaped_name, storage_len, self.fun_data_attributes)
         )
 
         i_top = len(self.fun_data)
@@ -1310,6 +1317,8 @@ class RawCodeNative(RawCode):
             print()
             i = i16
 
+        if storage_len != len(self.fun_data):
+            print("    0x00, // Keep the next RISC-V code array halfword-aligned.")
         print("};")
 
         prelude_ptr = None

@@ -8,6 +8,8 @@ on:
       - 'ports/esp32/**'
       - 'tools/verify_esp32_ble_wifi.py'
       - 'tools/verify_espide_english.py'
+      - 'tools/mpy-tool.py'
+      - 'tools/verify_esp32_frozen_native.py'
       - 'tools/tests/test_espide_*.py'
   pull_request:
     paths:
@@ -16,6 +18,8 @@ on:
       - 'ports/esp32/**'
       - 'tools/verify_esp32_ble_wifi.py'
       - 'tools/verify_espide_english.py'
+      - 'tools/mpy-tool.py'
+      - 'tools/verify_esp32_frozen_native.py'
       - 'tools/tests/test_espide_*.py'
   workflow_dispatch:
 
@@ -61,6 +65,9 @@ jobs:
       - name: Check effective memory configuration
         run: python tools/verify_esp32_ble_wifi.py "ports/esp32/build-$BOARD/sdkconfig"
 
+      - name: Check final frozen native code alignment
+        run: python tools/verify_esp32_frozen_native.py "ports/esp32/build-$BOARD/micropython.elf"
+
       - name: Record build identity and checksums
         shell: bash
         run: |
@@ -73,7 +80,8 @@ jobs:
             git submodule status
           } > "$build_dir/build-info.txt"
           cp ports/esp32/boards/ESPIDE/LICENSE "$build_dir/espide-LICENSE.txt"
-          (cd "$build_dir" && sha256sum firmware.bin micropython.bin > SHA256SUMS)
+          cp ports/esp32/boards/ESPIDE/FLASHING.txt "$build_dir/FLASHING.txt"
+          (cd "$build_dir" && sha256sum firmware.bin micropython.bin micropython.elf FLASHING.txt > SHA256SUMS)
 
       - name: Upload firmware
         uses: actions/upload-artifact@v6
@@ -82,6 +90,8 @@ jobs:
           path: |
             ports/esp32/build-${{ matrix.board }}/firmware.bin
             ports/esp32/build-${{ matrix.board }}/micropython.bin
+            ports/esp32/build-${{ matrix.board }}/micropython.elf
+            ports/esp32/build-${{ matrix.board }}/FLASHING.txt
             ports/esp32/build-${{ matrix.board }}/bootloader/bootloader.bin
             ports/esp32/build-${{ matrix.board }}/partition_table/partition-table.bin
             ports/esp32/build-${{ matrix.board }}/flasher_args.json
