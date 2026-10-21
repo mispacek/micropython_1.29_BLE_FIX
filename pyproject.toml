@@ -4,6 +4,8 @@ ignore-regex = '\b[A-Z]{3}\b'
 ignore-words-list = "ans,asend,deques,dout,emac,extint,hsi,iput,mis,notin,numer,ser,shft,som,synopsys,technic,ure,curren"
 quiet-level = 3
 skip = """
+./ports/esp32/boards/ESPIDE/modules,\
+./ports/esp32/boards/ESPIDE/filesystem/boot.py,\
 */build*,\
 ./.git,\
 ./drivers/cc3100,\
@@ -24,6 +26,9 @@ ACKNOWLEDGEMENTS,\
 [tool.ruff]
 # Exclude third-party code from linting and formatting
 extend-exclude = [
+  # Imported firmware snapshots retain their source bytes; see ESPIDE/SOURCES.json.
+  "ports/esp32/boards/ESPIDE/modules",
+  "ports/esp32/boards/ESPIDE/filesystem/boot.py",
   "lib",
   "esp-idf",
   "pico-sdk",

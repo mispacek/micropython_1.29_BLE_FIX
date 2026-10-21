@@ -1,0 +1,96 @@
+name: ESP32 BLE Wi-Fi firmware
+
+on:
+  push:
+    paths:
+      - '.github/workflows/esp32_bin_artifacts.yml'
+      - '.github/actions/setup_esp32/**'
+      - 'ports/esp32/**'
+      - 'tools/verify_esp32_ble_wifi.py'
+      - 'tools/tests/test_espide_startup.py'
+  pull_request:
+    paths:
+      - '.github/workflows/esp32_bin_artifacts.yml'
+      - '.github/actions/setup_esp32/**'
+      - 'ports/esp32/**'
+      - 'tools/verify_esp32_ble_wifi.py'
+      - 'tools/tests/test_espide_startup.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        board: [ESP32_GENERIC_C3, ESP32_GENERIC_C6]
+    env:
+      IDF_VER: v5.5.2
+      BOARD: ${{ matrix.board }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Check filesystem startup
+        run: python -m unittest discover -s tools/tests -p test_espide_startup.py -v
+
+      - name: Setup ESP-IDF
+        uses: ./.github/actions/setup_esp32
+        with:
+          idf_ver: ${{ env.IDF_VER }}
+          ccache_key: ble-wifi-${{ matrix.board }}
+
+      - name: Build firmware
+        shell: bash
+        run: |
+          source tools/ci.sh
+          ci_esp32_build_common
+          make ${MAKEOPTS} -C ports/esp32 BOARD="$BOARD"
+
+      - name: Check effective memory configuration
+        run: python tools/verify_esp32_ble_wifi.py "ports/esp32/build-$BOARD/sdkconfig"
+
+      - name: Record build identity and checksums
+        shell: bash
+        run: |
+          build_dir="ports/esp32/build-$BOARD"
+          {
+            echo "board=$BOARD"
+            echo "micropython_commit=$(git rev-parse HEAD)"
+            echo "micropython_base=v1.29.0"
+            echo "esp_idf=$IDF_VER"
+            git submodule status
+          } > "$build_dir/build-info.txt"
+          cp ports/esp32/boards/ESPIDE/LICENSE "$build_dir/espide-LICENSE.txt"
+          (cd "$build_dir" && sha256sum firmware.bin micropython.bin > SHA256SUMS)
+
+      - name: Upload firmware
+        uses: actions/upload-artifact@v6
+        with:
+          name: ${{ matrix.board }}-v1.29.0-ble-wifi
+          path: |
+            ports/esp32/build-${{ matrix.board }}/firmware.bin
+            ports/esp32/build-${{ matrix.board }}/micropython.bin
+            ports/esp32/build-${{ matrix.board }}/bootloader/bootloader.bin
+            ports/esp32/build-${{ matrix.board }}/partition_table/partition-table.bin
+            ports/esp32/build-${{ matrix.board }}/flasher_args.json
+            ports/esp32/build-${{ matrix.board }}/sdkconfig
+            ports/esp32/build-${{ matrix.board }}/build-info.txt
+            ports/esp32/build-${{ matrix.board }}/SHA256SUMS
+            ports/esp32/build-${{ matrix.board }}/espide-LICENSE.txt
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Upload filesystem startup files
+        uses: actions/upload-artifact@v6
+        with:
+          name: ${{ matrix.board }}-filesystem
+          path: ports/esp32/boards/ESPIDE/filesystem/
+          if-no-files-found: error
+          retention-days: 30

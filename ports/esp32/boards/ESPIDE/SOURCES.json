@@ -1,0 +1,65 @@
+[
+  {
+    "file": "AccelStepper.py",
+    "source": "mispacek/micropython_BLE_FIX@403ac1335:ports/esp32/boards/ESP32_GENERIC_C3/modules/AccelStepper.py",
+    "sha256": "39cf9edaf9e19232bc457517498e1b6464c98041710ea78041d049fd62e3a5c9",
+    "source_sha256": "de8c1fd04a50cb7ec71b7aa4f872d9533bf7be061be203b4d724cc7b02a05355",
+    "changes": "MIT license header only; Python AST unchanged"
+  },
+  {
+    "file": "eyes_optimized.py",
+    "source": "mispacek/micropython_BLE_FIX@403ac1335:ports/esp32/boards/ESP32_GENERIC_C3/modules/eyes_optimized.py",
+    "sha256": "d4f6dcf09fad53109582ebcfbfca97d02931792bba67d72e7f01fe46124b62c3",
+    "source_sha256": "1743f69ab83538e6d5c2eb488793d1287967ce6d2997c5a0d18088eeeb97ddbd",
+    "changes": "MIT license header only; Python AST unchanged"
+  },
+  {
+    "file": "fm_rpc.py",
+    "source": "mispacek/micropython_BLE_FIX@403ac1335:ports/esp32/boards/ESP32_GENERIC_C3/modules/fm_rpc.py",
+    "sha256": "603d1ac1c9fc34c28897c4a1c05f16248a1192610f21438babbfa9026e06f85f",
+    "source_sha256": "e139129500effcd6ff6f7ba2c906d3d37942258d3d2064846f42831f8893d738",
+    "changes": "MIT license header only; Python AST unchanged"
+  },
+  {
+    "file": "oled_charts.py",
+    "source": "mispacek/micropython_BLE_FIX@403ac1335:ports/esp32/boards/ESP32_GENERIC_C3/modules/oled_charts.py",
+    "sha256": "1ebf01c2b07a502e1bdd5c51d56dd3d96d35051cc20ec0642a14230eab56c219",
+    "source_sha256": "a99ef7ab9d726c53644064bd0a8a2cb316a4539fca3d58499e9a9f154a5709e9",
+    "changes": "MIT license header only; Python AST unchanged"
+  },
+  {
+    "file": "tcs34725.py",
+    "source": "mispacek/micropython_BLE_FIX@403ac1335:ports/esp32/boards/ESP32_GENERIC_C3/modules/tcs34725.py",
+    "sha256": "deedd281503a094aefc5285204efcd0b7d555e500e961ccabc9d101220b62784",
+    "source_sha256": "75e2dd030244a007854efb8292ec53dc340312a857acfb3905e23c4bd5814238",
+    "changes": "MIT license header only; Python AST unchanged"
+  },
+  {
+    "file": "vl53l0x.py",
+    "source": "mispacek/micropython_BLE_FIX@403ac1335:ports/esp32/boards/ESP32_GENERIC_C3/modules/vl53l0x.py",
+    "sha256": "724d8b3dc895bc7a8a0a022bbe3ca30f21521b21e24c6da4381fff00649e897a",
+    "source_sha256": "33bffde48435b74ec8f32301c20942d797edc9ae5d7a156585652a1791485cf8",
+    "changes": "MIT license header only; Python AST unchanged"
+  },
+  {
+    "file": "ble_repl_bletime.py",
+    "source": "instalace_new/esp32_s3_1_29_BLE/ble_repl_bletime.py",
+    "sha256": "e0ea151ceeaf0cf44fe011bdc1ee5a2ec74ee5c8a7d65ca6bdff67345f796662",
+    "source_sha256": "e0ea151ceeaf0cf44fe011bdc1ee5a2ec74ee5c8a7d65ca6bdff67345f796662",
+    "changes": "none"
+  },
+  {
+    "file": "bletime.py",
+    "source": "instalace_new/esp32_s3_1_29_BLE/bletime.py",
+    "sha256": "21704ccf0f2fd5bd20c7f50c07beeb3eeaab0dbb2fa7e42a5c67e9874c2ab7fe",
+    "source_sha256": "21704ccf0f2fd5bd20c7f50c07beeb3eeaab0dbb2fa7e42a5c67e9874c2ab7fe",
+    "changes": "none"
+  },
+  {
+    "file": "filesystem/boot.py",
+    "source": "instalace_new/esp32_s3_1_29_BLE/boot.py",
+    "sha256": "3a5d720ec18912b40af6a08d8848af62169c0058a1ddb84c100ef0380b41b918",
+    "source_sha256": "d9d0beb0d2232eb6b428db7e749c27d525f8fbfb35b2d7369dcacc26bc404965",
+    "changes": "MIT license header only; Python AST unchanged"
+  }
+]
