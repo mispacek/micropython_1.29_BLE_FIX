@@ -1,9 +1,10 @@
-# ESP IDE: MicroPython v1.29.0 for ESP32-C3, ESP32-C6 and ESP32-S3
+# ESP IDE: MicroPython v1.29.0 for ESP32, ESP32-C3/C6 and ESP32-S3
 
 This repository starts at the official `v1.29.0` release, commit
 `0fd6c573ea815774668bbb16b8e197c8822368b2`. The release tag is retained unchanged.
-Custom firmware uses the existing `ESP32_GENERIC_C3`, `ESP32_GENERIC_C6` and
-`ESP32_GENERIC_S3` board names, with ESP-IDF **v5.5.2**. Other boards are unchanged.
+Custom firmware uses the existing `ESP32_GENERIC`, `ESP32_GENERIC_C3`,
+`ESP32_GENERIC_C6` and `ESP32_GENERIC_S3` board names, with ESP-IDF **v5.5.2**.
+Other boards are unchanged.
 
 ## Memory profile
 
@@ -25,9 +26,15 @@ Both the standard S3 build (Quad PSRAM or no PSRAM) and `SPIRAM_OCT` are built.
 Use the Octal variant only for boards with Octal PSRAM. Both variants freeze
 the same modules, compiled for Xtensa instead of RISC-V.
 
+Classic ESP32 also uses `sdkconfig.ble_single_connection` and the shared
+manifest, retaining its other upstream memory settings. CI builds the standard
+`ESP32_GENERIC` variant for WROOM-style boards with at least 4 MB flash. This
+artifact does not enable PSRAM; SPIRAM, D2WD, UNICORE and OTA variants are not
+validated by this workflow.
+
 ## Frozen Python modules
 
-All three chips use one manifest at `ports/esp32/boards/ESPIDE/manifest.py`. It keeps
+All four chips use one manifest at `ports/esp32/boards/ESPIDE/manifest.py`. It keeps
 the standard MicroPython networking and driver modules, then freezes:
 
 - `ble_repl_bletime.py` and `bletime.py`: the user-selected sources from
@@ -71,7 +78,7 @@ Upload `boot.py` as `/boot.py` and `main.py` as `/main.py`. The supplied `boot.p
 is the ESP IDE source from the same S3 installation with its MIT license header
 and English diagnostics and comments. Its control flow is unchanged. It provides
 `run_code()` and the usual ESP IDE REPL helpers. The adapted `main.py` imports
-its dependencies explicitly and uses a C3/C6/S3 banner.
+its dependencies explicitly and uses a shared ESP IDE firmware banner.
 
 - BLE starts only when `/cfg/ble_name.cfg` contains a stripped name of 3-8
   printable ASCII characters. Invalid names are rejected instead of truncated
@@ -91,7 +98,8 @@ Keep the other, non-frozen ESP IDE libraries installed.
 
 ## Build and artifacts
 
-For installation, flash the combined **`firmware.bin` at `0x0`**, then reset.
+For installation, flash the combined **`firmware.bin` at `0x1000` for classic
+ESP32**, or **`0x0` for C3/C6/S3**, then reset.
 `micropython.bin` is only the application at `0x10000`; it requires the matching
 bootloader and partition table. Each firmware artifact includes `FLASHING.txt`.
 
@@ -109,6 +117,7 @@ submodules from this checkout. After sourcing the IDF environment:
 ```sh
 make -C mpy-cross
 make -C ports/esp32 submodules
+make -C ports/esp32 BOARD=ESP32_GENERIC
 make -C ports/esp32 BOARD=ESP32_GENERIC_C3
 make -C ports/esp32 BOARD=ESP32_GENERIC_C6
 make -C ports/esp32 BOARD=ESP32_GENERIC_S3
@@ -117,7 +126,7 @@ python tools/verify_esp32_ble_wifi.py ports/esp32/build-ESP32_GENERIC_C3/sdkconf
 python tools/verify_esp32_ble_wifi.py ports/esp32/build-ESP32_GENERIC_C6/sdkconfig
 ```
 
-The **ESP32 BLE Wi-Fi firmware** GitHub Actions workflow builds all four targets,
+The **ESP32 BLE Wi-Fi firmware** GitHub Actions workflow builds all five targets,
 checks their effective configuration, and uploads separate firmware and
 filesystem artifacts. Firmware artifacts include `firmware.bin`,
 `micropython.bin`, bootloader/partition files, `sdkconfig`, build identity,

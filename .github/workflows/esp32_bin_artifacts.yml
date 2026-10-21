@@ -38,6 +38,10 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - board: ESP32_GENERIC
+            build: ESP32_GENERIC
+            variant: ''
+            profile: ports/esp32/boards/sdkconfig.ble_single_connection
           - board: ESP32_GENERIC_C3
             build: ESP32_GENERIC_C3
             variant: ''
