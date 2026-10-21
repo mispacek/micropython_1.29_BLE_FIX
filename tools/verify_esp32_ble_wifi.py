@@ -17,9 +17,13 @@ def read_config(path):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("sdkconfig", type=Path)
+    parser.add_argument(
+        "--profile",
+        type=Path,
+        default=Path(__file__).resolve().parents[1] / "ports/esp32/boards/sdkconfig.ble_wifi_coex",
+    )
     args = parser.parse_args()
-    profile = Path(__file__).resolve().parents[1] / "ports/esp32/boards/sdkconfig.ble_wifi_coex"
-    expected = read_config(profile)
+    expected = read_config(args.profile)
     actual = read_config(args.sdkconfig)
     mismatches = [
         f"{key}: expected {value}, got {actual.get(key, 'missing')}"

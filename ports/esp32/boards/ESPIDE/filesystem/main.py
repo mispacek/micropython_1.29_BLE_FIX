@@ -66,6 +66,6 @@ def autostart():
 gc.collect()
 time.sleep_ms(100)
 gc.collect()
-print("ESP IDE MicroPython 1.29 C3/C6 BLE")
+print("ESP IDE MicroPython 1.29 C3/C6/S3 BLE")
 start_BLE()
 autostart()

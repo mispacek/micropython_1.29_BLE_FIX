@@ -1,8 +1,11 @@
-ESP32-C3 / ESP32-C6 MicroPython v1.29.0 BLE + Wi-Fi
+ESP32-C3 / ESP32-C6 / ESP32-S3 MicroPython v1.29.0 BLE + Wi-Fi
 
 Use the artifact for your chip. For a normal installation, select firmware.bin
 and flash it at address 0x0, then reset the board. It includes the bootloader,
 partition table and MicroPython application.
+
+For ESP32-S3, use SPIRAM_OCT only with Octal PSRAM. The standard build supports
+Quad PSRAM and boards without PSRAM, following the upstream board defaults.
 
 micropython.bin is the application ONLY. Its offset is 0x10000. It requires
 the matching bootloader at 0x0 and partition table at 0x8000. Do not flash

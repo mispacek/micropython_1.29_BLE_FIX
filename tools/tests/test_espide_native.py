@@ -24,10 +24,10 @@ MPY = load_tool("espide_mpy_tool", "mpy-tool.py")
 VERIFY = load_tool("espide_native_verify", "verify_esp32_frozen_native.py")
 
 
-def elf_fixture(address, size):
+def elf_fixture(address, size, machine=243):
     image = bytearray(512)
     image[:6] = b"\x7fELF\x01\x01"
-    struct.pack_into("<H", image, 18, 243)
+    struct.pack_into("<H", image, 18, machine)
     struct.pack_into("<I", image, 32, 64)
     struct.pack_into("<HH", image, 46, 40, 4)
     struct.pack_into("<10I", image, 104, 0, 1, 6, 0x42000000, 400, 16, 0, 0, 2, 0)
@@ -83,6 +83,17 @@ class FrozenNativeTests(unittest.TestCase):
     def test_final_elf_rejects_odd_storage_size(self):
         with self.assertRaisesRegex(ValueError, "size=547"):
             VERIFY.verify(elf_fixture(0x420557E4, 547))
+
+    def test_xtensa_accepts_word_aligned_odd_length_code(self):
+        self.assertEqual(VERIFY.verify(elf_fixture(0x420557E4, 547, 94))[0][1], 0x420557E4)
+
+    def test_xtensa_rejects_halfword_only_alignment(self):
+        with self.assertRaisesRegex(ValueError, "address=0x420557e2"):
+            VERIFY.verify(elf_fixture(0x420557E2, 548, 94))
+
+    def test_unsupported_machine_is_rejected(self):
+        with self.assertRaisesRegex(ValueError, "Unsupported ELF machine"):
+            VERIFY.verify(elf_fixture(0x420557E4, 548, 3))
 
 
 if __name__ == "__main__":

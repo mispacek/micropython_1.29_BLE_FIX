@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Check final ELF addresses of frozen RISC-V native functions."""
+"""Check final ELF addresses of frozen RISC-V and Xtensa native functions."""
 
 import argparse
 from pathlib import Path
@@ -7,8 +7,12 @@ import struct
 
 
 def verify(data):
-    if data[:6] != b"\x7fELF\x01\x01" or struct.unpack_from("<H", data, 18)[0] != 243:
-        raise ValueError("Expected a little-endian ELF32 RISC-V image")
+    if data[:6] != b"\x7fELF\x01\x01":
+        raise ValueError("Expected a little-endian ELF32 image")
+    machine = struct.unpack_from("<H", data, 18)[0]
+    if machine not in (94, 243):  # EM_XTENSA, EM_RISCV
+        raise ValueError("Unsupported ELF machine: %d" % machine)
+    alignment = 4 if machine == 94 else 2
     section_offset = struct.unpack_from("<I", data, 32)[0]
     section_size, section_count = struct.unpack_from("<HH", data, 46)
     sections = [
@@ -35,10 +39,10 @@ def verify(data):
     errors = [
         "%s: address=0x%x size=%d" % (name, address, size)
         for name, address, size in symbols
-        if address & 1 or size & 1
+        if address % alignment or (machine == 243 and size & 1)
     ]
     if errors:
-        raise ValueError("Unaligned frozen RISC-V native code:\n" + "\n".join(errors))
+        raise ValueError("Unaligned frozen native code:\n" + "\n".join(errors))
     return symbols
 
 

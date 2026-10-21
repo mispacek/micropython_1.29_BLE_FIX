@@ -32,14 +32,33 @@ concurrency:
 
 jobs:
   build:
+    name: Build ${{ matrix.build }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        board: [ESP32_GENERIC_C3, ESP32_GENERIC_C6]
+        include:
+          - board: ESP32_GENERIC_C3
+            build: ESP32_GENERIC_C3
+            variant: ''
+            profile: ports/esp32/boards/sdkconfig.ble_wifi_coex
+          - board: ESP32_GENERIC_C6
+            build: ESP32_GENERIC_C6
+            variant: ''
+            profile: ports/esp32/boards/sdkconfig.ble_wifi_coex
+          - board: ESP32_GENERIC_S3
+            build: ESP32_GENERIC_S3
+            variant: ''
+            profile: ports/esp32/boards/sdkconfig.ble_single_connection
+          - board: ESP32_GENERIC_S3
+            build: ESP32_GENERIC_S3-SPIRAM_OCT
+            variant: SPIRAM_OCT
+            profile: ports/esp32/boards/sdkconfig.ble_single_connection
     env:
       IDF_VER: v5.5.2
       BOARD: ${{ matrix.board }}
+      BOARD_VARIANT: ${{ matrix.variant }}
+      BUILD_DIR: ports/esp32/build-${{ matrix.build }}
     steps:
       - uses: actions/checkout@v7
 
@@ -53,27 +72,28 @@ jobs:
         uses: ./.github/actions/setup_esp32
         with:
           idf_ver: ${{ env.IDF_VER }}
-          ccache_key: ble-wifi-${{ matrix.board }}
+          ccache_key: ble-wifi-${{ matrix.build }}
 
       - name: Build firmware
         shell: bash
         run: |
           source tools/ci.sh
           ci_esp32_build_common
-          make ${MAKEOPTS} -C ports/esp32 BOARD="$BOARD"
+          make ${MAKEOPTS} -C ports/esp32 BOARD="$BOARD" BOARD_VARIANT="$BOARD_VARIANT"
 
       - name: Check effective memory configuration
-        run: python tools/verify_esp32_ble_wifi.py "ports/esp32/build-$BOARD/sdkconfig"
+        run: python tools/verify_esp32_ble_wifi.py "$BUILD_DIR/sdkconfig" --profile "${{ matrix.profile }}"
 
       - name: Check final frozen native code alignment
-        run: python tools/verify_esp32_frozen_native.py "ports/esp32/build-$BOARD/micropython.elf"
+        run: python tools/verify_esp32_frozen_native.py "$BUILD_DIR/micropython.elf"
 
       - name: Record build identity and checksums
         shell: bash
         run: |
-          build_dir="ports/esp32/build-$BOARD"
+          build_dir="$BUILD_DIR"
           {
             echo "board=$BOARD"
+            echo "board_variant=${BOARD_VARIANT:-standard}"
             echo "micropython_commit=$(git rev-parse HEAD)"
             echo "micropython_base=v1.29.0"
             echo "esp_idf=$IDF_VER"
@@ -86,26 +106,26 @@ jobs:
       - name: Upload firmware
         uses: actions/upload-artifact@v6
         with:
-          name: ${{ matrix.board }}-v1.29.0-ble-wifi
+          name: ${{ matrix.build }}-v1.29.0-ble-wifi
           path: |
-            ports/esp32/build-${{ matrix.board }}/firmware.bin
-            ports/esp32/build-${{ matrix.board }}/micropython.bin
-            ports/esp32/build-${{ matrix.board }}/micropython.elf
-            ports/esp32/build-${{ matrix.board }}/FLASHING.txt
-            ports/esp32/build-${{ matrix.board }}/bootloader/bootloader.bin
-            ports/esp32/build-${{ matrix.board }}/partition_table/partition-table.bin
-            ports/esp32/build-${{ matrix.board }}/flasher_args.json
-            ports/esp32/build-${{ matrix.board }}/sdkconfig
-            ports/esp32/build-${{ matrix.board }}/build-info.txt
-            ports/esp32/build-${{ matrix.board }}/SHA256SUMS
-            ports/esp32/build-${{ matrix.board }}/espide-LICENSE.txt
+            ${{ env.BUILD_DIR }}/firmware.bin
+            ${{ env.BUILD_DIR }}/micropython.bin
+            ${{ env.BUILD_DIR }}/micropython.elf
+            ${{ env.BUILD_DIR }}/FLASHING.txt
+            ${{ env.BUILD_DIR }}/bootloader/bootloader.bin
+            ${{ env.BUILD_DIR }}/partition_table/partition-table.bin
+            ${{ env.BUILD_DIR }}/flasher_args.json
+            ${{ env.BUILD_DIR }}/sdkconfig
+            ${{ env.BUILD_DIR }}/build-info.txt
+            ${{ env.BUILD_DIR }}/SHA256SUMS
+            ${{ env.BUILD_DIR }}/espide-LICENSE.txt
           if-no-files-found: error
           retention-days: 30
 
       - name: Upload filesystem startup files
         uses: actions/upload-artifact@v6
         with:
-          name: ${{ matrix.board }}-filesystem
+          name: ${{ matrix.build }}-filesystem
           path: ports/esp32/boards/ESPIDE/filesystem/
           if-no-files-found: error
           retention-days: 30
