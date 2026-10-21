@@ -15,10 +15,10 @@ BASE = Path(__file__).resolve().parents[1] / "ports/esp32/boards/ESPIDE"
 CZECH_TEXT = re.compile(
     r"\b(?:chyba|chyby|chybu|nebyl|povolen|nazev|znaku|programu|"
     r"cteni|soubor|souboru|knihovny|nedostatek|zastaveni|spatne|spatny|"
-    r"pouzita|promenna|neexistuje|objekt|deleni|zkontroluj|startuji|"
+    r"pouzita|promenna|neexistuje|objekt|deleni|zkontroluj|startuji|"  # codespell:ignore objekt
     r"nepouziva|hodnoty|hodnotu|puvodni|vraci|vracim|blokuju|"
     r"dalkomerem|predpocty|zaoblene|barvy|vicka|rozmery|roztec|"
-    r"prepinace|parametry|serazeni|horni|dolni|levy|pravy|leve|prave|"
+    r"prepinace|parametry|serazeni|horni|dolni|levy|pravy|leve|prave|"  # codespell:ignore leve
     r"kresleni|logika|smysce|smycce|pokracuj|ochrana|usporne|"
     r"potrebujeme|zaoblovat|tupliky|prijima|vytvor|mezery|lokalni)\b",
     re.IGNORECASE,
