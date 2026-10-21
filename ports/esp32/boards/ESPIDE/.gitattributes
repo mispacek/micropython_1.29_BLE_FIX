@@ -1,0 +1,3 @@
+# Preserve imported source snapshots exactly as recorded in SOURCES.json.
+modules/*.py -text -whitespace
+filesystem/boot.py -text -whitespace

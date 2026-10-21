@@ -1,0 +1,2 @@
+# Keep the standard board memory profile, allowing one NimBLE connection.
+CONFIG_BT_NIMBLE_MAX_CONNECTIONS=1

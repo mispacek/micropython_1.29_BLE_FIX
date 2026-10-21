@@ -1,0 +1,135 @@
+name: ESP32 BLE Wi-Fi firmware
+
+on:
+  push:
+    paths:
+      - '.github/workflows/esp32_bin_artifacts.yml'
+      - '.github/actions/setup_esp32/**'
+      - 'ports/esp32/**'
+      - 'tools/verify_esp32_ble_wifi.py'
+      - 'tools/verify_espide_english.py'
+      - 'tools/mpy-tool.py'
+      - 'tools/verify_esp32_frozen_native.py'
+      - 'tools/tests/test_espide_*.py'
+  pull_request:
+    paths:
+      - '.github/workflows/esp32_bin_artifacts.yml'
+      - '.github/actions/setup_esp32/**'
+      - 'ports/esp32/**'
+      - 'tools/verify_esp32_ble_wifi.py'
+      - 'tools/verify_espide_english.py'
+      - 'tools/mpy-tool.py'
+      - 'tools/verify_esp32_frozen_native.py'
+      - 'tools/tests/test_espide_*.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build ${{ matrix.build }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - board: ESP32_GENERIC
+            build: ESP32_GENERIC
+            variant: ''
+            profile: ports/esp32/boards/sdkconfig.ble_single_connection
+          - board: ESP32_GENERIC_C3
+            build: ESP32_GENERIC_C3
+            variant: ''
+            profile: ports/esp32/boards/sdkconfig.ble_wifi_coex
+          - board: ESP32_GENERIC_C6
+            build: ESP32_GENERIC_C6
+            variant: ''
+            profile: ports/esp32/boards/sdkconfig.ble_wifi_coex
+          - board: ESP32_GENERIC_S3
+            build: ESP32_GENERIC_S3
+            variant: ''
+            profile: ports/esp32/boards/sdkconfig.ble_single_connection
+          - board: ESP32_GENERIC_S3
+            build: ESP32_GENERIC_S3-SPIRAM_OCT
+            variant: SPIRAM_OCT
+            profile: ports/esp32/boards/sdkconfig.ble_single_connection
+    env:
+      IDF_VER: v5.5.2
+      BOARD: ${{ matrix.board }}
+      BOARD_VARIANT: ${{ matrix.variant }}
+      BUILD_DIR: ports/esp32/build-${{ matrix.build }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Check English firmware sources
+        run: python tools/verify_espide_english.py
+
+      - name: Check startup and persistent variables
+        run: python -m unittest discover -s tools/tests -p 'test_espide_*.py' -v
+
+      - name: Setup ESP-IDF
+        uses: ./.github/actions/setup_esp32
+        with:
+          idf_ver: ${{ env.IDF_VER }}
+          ccache_key: ble-wifi-${{ matrix.build }}
+
+      - name: Build firmware
+        shell: bash
+        run: |
+          source tools/ci.sh
+          ci_esp32_build_common
+          make ${MAKEOPTS} -C ports/esp32 BOARD="$BOARD" BOARD_VARIANT="$BOARD_VARIANT"
+
+      - name: Check effective memory configuration
+        run: python tools/verify_esp32_ble_wifi.py "$BUILD_DIR/sdkconfig" --profile "${{ matrix.profile }}"
+
+      - name: Check final frozen native code alignment
+        run: python tools/verify_esp32_frozen_native.py "$BUILD_DIR/micropython.elf"
+
+      - name: Record build identity and checksums
+        shell: bash
+        run: |
+          build_dir="$BUILD_DIR"
+          {
+            echo "board=$BOARD"
+            echo "board_variant=${BOARD_VARIANT:-standard}"
+            echo "micropython_commit=$(git rev-parse HEAD)"
+            echo "micropython_base=v1.29.0"
+            echo "esp_idf=$IDF_VER"
+            git submodule status
+          } > "$build_dir/build-info.txt"
+          cp ports/esp32/boards/ESPIDE/LICENSE "$build_dir/espide-LICENSE.txt"
+          cp ports/esp32/boards/ESPIDE/FLASHING.txt "$build_dir/FLASHING.txt"
+          (cd "$build_dir" && sha256sum firmware.bin micropython.bin micropython.elf FLASHING.txt > SHA256SUMS)
+
+      - name: Upload firmware
+        uses: actions/upload-artifact@v6
+        with:
+          name: ${{ matrix.build }}-v1.29.0-ble-wifi
+          path: |
+            ${{ env.BUILD_DIR }}/firmware.bin
+            ${{ env.BUILD_DIR }}/micropython.bin
+            ${{ env.BUILD_DIR }}/micropython.elf
+            ${{ env.BUILD_DIR }}/FLASHING.txt
+            ${{ env.BUILD_DIR }}/bootloader/bootloader.bin
+            ${{ env.BUILD_DIR }}/partition_table/partition-table.bin
+            ${{ env.BUILD_DIR }}/flasher_args.json
+            ${{ env.BUILD_DIR }}/sdkconfig
+            ${{ env.BUILD_DIR }}/build-info.txt
+            ${{ env.BUILD_DIR }}/SHA256SUMS
+            ${{ env.BUILD_DIR }}/espide-LICENSE.txt
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Upload filesystem startup files
+        uses: actions/upload-artifact@v6
+        with:
+          name: ${{ matrix.build }}-filesystem
+          path: ports/esp32/boards/ESPIDE/filesystem/
+          if-no-files-found: error
+          retention-days: 30
