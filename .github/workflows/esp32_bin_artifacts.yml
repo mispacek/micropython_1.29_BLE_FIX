@@ -8,7 +8,7 @@ on:
       - 'ports/esp32/**'
       - 'tools/verify_esp32_ble_wifi.py'
       - 'tools/verify_espide_english.py'
-      - 'tools/tests/test_espide_startup.py'
+      - 'tools/tests/test_espide_*.py'
   pull_request:
     paths:
       - '.github/workflows/esp32_bin_artifacts.yml'
@@ -16,7 +16,7 @@ on:
       - 'ports/esp32/**'
       - 'tools/verify_esp32_ble_wifi.py'
       - 'tools/verify_espide_english.py'
-      - 'tools/tests/test_espide_startup.py'
+      - 'tools/tests/test_espide_*.py'
   workflow_dispatch:
 
 permissions:
@@ -42,8 +42,8 @@ jobs:
       - name: Check English firmware sources
         run: python tools/verify_espide_english.py
 
-      - name: Check filesystem startup
-        run: python -m unittest discover -s tools/tests -p test_espide_startup.py -v
+      - name: Check startup and persistent variables
+        run: python -m unittest discover -s tools/tests -p 'test_espide_*.py' -v
 
       - name: Setup ESP-IDF
         uses: ./.github/actions/setup_esp32

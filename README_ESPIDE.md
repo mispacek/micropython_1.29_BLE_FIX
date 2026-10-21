@@ -25,9 +25,19 @@ the standard MicroPython networking and driver modules, then freezes:
 
 - `ble_repl_bletime.py` and `bletime.py`: the user-selected sources from
   `instalace_new/esp32_s3_1_29_BLE`, copied on 2026-10-21.
-- `AccelStepper.py`, `eyes_optimized.py`, `fm_rpc.py`, `oled_charts.py`,
-  `tcs34725.py`, and `vl53l0x.py`: final sources from the old repository at
-  `403ac1335`.
+- `eyes_optimized.py`, `fm_rpc.py`, `espide_monofont.py`, `pvstore.py`,
+  `oled_spi.py`, `oled.py`, `oled_charts.py`, `vl53l0x.py`, and `tcs34725.py`:
+  refreshed from the same user-selected S3 installation on 2026-10-21, with
+  English comments, descriptions and diagnostics.
+- `AccelStepper.py`: source from the old repository at `403ac1335`, with a MIT
+  header and English comments.
+
+There are **12 custom frozen modules** in total. All nine selected libraries
+were checked against their source snapshots; translation preserves their
+non-string AST, APIs and protocol tokens. `pvstore` deliberately retains the
+legacy `ano`/`ne` boolean input aliases for existing configuration files, as
+requested. All of its diagnostics are English. `espide_monofont` freezes the
+renderer; MFNT font data files are still loaded from the device filesystem.
 
 `ble_flag.py` is not included: the selected BLE driver and time compatibility
 module use native interruption. The legacy `fm_rpc.py` treats its `ble_flag`
@@ -68,7 +78,7 @@ its dependencies explicitly and uses a C3/C6 banner.
   separate. This directory is a startup-file package, not a full web installer.
 
 When updating an existing installation, remove obsolete filesystem copies of
-the eight frozen modules from `/` and `/lib/` (including `.mpy` copies), or make
+the twelve frozen modules from `/` and `/lib/` (including `.mpy` copies), or make
 sure they are the intended versions. Filesystem copies can shadow frozen code.
 Keep the other, non-frozen ESP IDE libraries installed.
 
@@ -96,7 +106,7 @@ custom commit; `v1.29.0` identifies the unchanged upstream base.
 Host startup checks can also run without ESP-IDF:
 
 ```sh
-python -m unittest discover -s tools/tests -p test_espide_startup.py -v
+python -m unittest discover -s tools/tests -p 'test_espide_*.py' -v
 python tools/verify_espide_english.py
 ```
 

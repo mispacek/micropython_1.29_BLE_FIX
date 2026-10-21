@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2019-2026 Milan Spacek
 # ESP IDE: https://espide.eu
-# Released under MIT for this fork by the copyright holder on 2026-10-21.
 
 from micropython import const
 import ustruct

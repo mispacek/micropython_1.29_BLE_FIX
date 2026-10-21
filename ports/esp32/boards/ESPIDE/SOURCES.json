@@ -8,38 +8,43 @@
   },
   {
     "file": "eyes_optimized.py",
-    "source": "mispacek/micropython_BLE_FIX@403ac1335:ports/esp32/boards/ESP32_GENERIC_C3/modules/eyes_optimized.py",
-    "sha256": "c4c065ad2236640038f32d7f7619412922a7d39d2651cc41b293d45956728d74",
+    "source": "instalace_new/esp32_s3_1_29_BLE/eyes_optimized.py",
     "source_sha256": "1743f69ab83538e6d5c2eb488793d1287967ce6d2997c5a0d18088eeeb97ddbd",
-    "changes": "MIT license header and English comments/messages; non-string AST unchanged"
+    "sha256": "8cf2ac7709392e553c0b5d4436e460bfe7798d91ebe11cf98149a02f85ed80e1",
+    "changes": "MIT header, English comments/messages and LF line endings; non-string AST unchanged",
+    "snapshot_date": "2026-10-21"
   },
   {
     "file": "fm_rpc.py",
-    "source": "mispacek/micropython_BLE_FIX@403ac1335:ports/esp32/boards/ESP32_GENERIC_C3/modules/fm_rpc.py",
-    "sha256": "fbca5cfd6171a8ecdee7a254f8f5f528cb6fde649d86086bb5b9ec065342f089",
+    "source": "instalace_new/esp32_s3_1_29_BLE/fm_rpc.py",
     "source_sha256": "e139129500effcd6ff6f7ba2c906d3d37942258d3d2064846f42831f8893d738",
-    "changes": "MIT license header and English comments/messages; non-string AST unchanged"
+    "sha256": "c87525c10a85d9812d252751635acfb48ec6b204e00a83bb8206efefc657c76f",
+    "changes": "MIT header, English comments/messages and LF line endings; non-string AST unchanged",
+    "snapshot_date": "2026-10-21"
   },
   {
     "file": "oled_charts.py",
-    "source": "mispacek/micropython_BLE_FIX@403ac1335:ports/esp32/boards/ESP32_GENERIC_C3/modules/oled_charts.py",
-    "sha256": "1ebf01c2b07a502e1bdd5c51d56dd3d96d35051cc20ec0642a14230eab56c219",
+    "source": "instalace_new/esp32_s3_1_29_BLE/oled_charts.py",
     "source_sha256": "a99ef7ab9d726c53644064bd0a8a2cb316a4539fca3d58499e9a9f154a5709e9",
-    "changes": "MIT license header only; Python AST unchanged"
+    "sha256": "1ebf01c2b07a502e1bdd5c51d56dd3d96d35051cc20ec0642a14230eab56c219",
+    "changes": "MIT header, English comments/messages and LF line endings; non-string AST unchanged",
+    "snapshot_date": "2026-10-21"
   },
   {
     "file": "tcs34725.py",
-    "source": "mispacek/micropython_BLE_FIX@403ac1335:ports/esp32/boards/ESP32_GENERIC_C3/modules/tcs34725.py",
-    "sha256": "dd7eb2c74c31238dae0cf05004725da2c46e69ebb7a1465fd12a8576ecf02ecc",
-    "source_sha256": "75e2dd030244a007854efb8292ec53dc340312a857acfb3905e23c4bd5814238",
-    "changes": "MIT license header and English comments/messages; non-string AST unchanged"
+    "source": "instalace_new/esp32_s3_1_29_BLE/tcs34725.py",
+    "source_sha256": "82d4ea39b32314ceecf0b19f4a293d8c84c2aa08e6df80bba548fe2cbd348a6a",
+    "sha256": "aa6be3b926667eadf10584b312aab626c128e703fe877a88b99aabe908f42deb",
+    "changes": "MIT header, English comments/messages and LF line endings; non-string AST unchanged",
+    "snapshot_date": "2026-10-21"
   },
   {
     "file": "vl53l0x.py",
-    "source": "mispacek/micropython_BLE_FIX@403ac1335:ports/esp32/boards/ESP32_GENERIC_C3/modules/vl53l0x.py",
-    "sha256": "684a8ba7f2910b5f2f22b3f185527d76ac9992e672fdd8ddce3801677cf242a7",
-    "source_sha256": "33bffde48435b74ec8f32301c20942d797edc9ae5d7a156585652a1791485cf8",
-    "changes": "MIT license header and English comments/messages; non-string AST unchanged"
+    "source": "instalace_new/esp32_s3_1_29_BLE/vl53l0x.py",
+    "source_sha256": "ef6dfb7863eac7dfb27ff0788f61b323a95f7c05c539a0543ed11c02f25e989d",
+    "sha256": "b8435a1bf59e3f8fe4b8bec23ddfac3554e366685c3927173fb864021e213b59",
+    "changes": "MIT header, English comments/messages and LF line endings; non-string AST unchanged",
+    "snapshot_date": "2026-10-21"
   },
   {
     "file": "ble_repl_bletime.py",
@@ -61,5 +66,37 @@
     "sha256": "05075c181b7a7bcbb5e4c456128273ffdb7a4c0cfaf76272b08f87306c6f469b",
     "source_sha256": "d9d0beb0d2232eb6b428db7e749c27d525f8fbfb35b2d7369dcacc26bc404965",
     "changes": "MIT license header and English comments/messages; non-string AST unchanged"
+  },
+  {
+    "file": "espide_monofont.py",
+    "source": "instalace_new/esp32_s3_1_29_BLE/espide_monofont.py",
+    "source_sha256": "2897fd690fa41ecbcea5c33434c2951e5fcc874d72631ecf5760ef87e11fbb47",
+    "sha256": "42506cb166967307ad3f05622684eb6a043aaaea0b3de084ef5770c46754c177",
+    "changes": "MIT header, English comments/messages and LF line endings; non-string AST unchanged",
+    "snapshot_date": "2026-10-21"
+  },
+  {
+    "file": "pvstore.py",
+    "source": "instalace_new/esp32_s3_1_29_BLE/pvstore.py",
+    "source_sha256": "86f7e33a5c842cd63e3f182f19230a346e8cb23b08f72786ad83e9c13401b5bd",
+    "sha256": "8cdffb62357b04117aa137da0ddc567656d621ac3a6d1616895878f3d26cb6f1",
+    "changes": "MIT header, English comments/messages and LF line endings; non-string AST unchanged",
+    "snapshot_date": "2026-10-21"
+  },
+  {
+    "file": "oled_spi.py",
+    "source": "instalace_new/esp32_s3_1_29_BLE/oled_spi.py",
+    "source_sha256": "f2e24b1cd805e793150cdad61cf386aac659cb10a4d1775cc6e36e01f7db20d7",
+    "sha256": "0e668987fd7216d80afe44a8c652d6b08d733e0e3d6ab64ab5da8eed6f96aad9",
+    "changes": "MIT header, English comments/messages and LF line endings; non-string AST unchanged",
+    "snapshot_date": "2026-10-21"
+  },
+  {
+    "file": "oled.py",
+    "source": "instalace_new/esp32_s3_1_29_BLE/oled.py",
+    "source_sha256": "1ce9cb57a3b4aa7eeae26e9129e5cbe03c02e0c6405dcf6c90ac5e4e07d43b95",
+    "sha256": "f4229e8240a00e497ca3e0b7d3150ae4e23cea461f23702c968865233d37d481",
+    "changes": "MIT header, English comments/messages and LF line endings; non-string AST unchanged",
+    "snapshot_date": "2026-10-21"
   }
 ]
